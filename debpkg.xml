@@ -2,23 +2,10 @@
 <project>
 
   <!-- ********************************************************* -->
-  <!-- Hostname: Reads the hostname to determine if it's arieljr -->
-  <!-- ********************************************************* -->
-  <target name="common-debpkg-hostname">
-    <hostinfo prefix="localhost"/>
-    <echo message="The current host is: ${localhost.NAME}" />
-    <condition property="isarieljr" value="true">
-      <equals arg1="${localhost.NAME}" arg2="arieljr" />
-    </condition>
-  </target>
-
-
-
-  <!-- ********************************************************* -->
   <!-- Defines the names of the packages -->
   <!-- ********************************************************* -->
-  <target name="common-debpkg-definenames" depends="common-svn-lastrevision">
-    <property name="package.version" value="${package.majorversion}.${svn-lastrevision}" />
+  <target name="common-debpkg-definenames" depends="common-svn-revision, common-git-revision">
+    <property name="package.version" value="${package.majorversion}.${repository.version}" />
     <echo>Version: ${package.version}</echo>
 
     <!-- <foo>_<VersionUpstream>-<DebianRevisionNumber>_<DebianArchitecture>.deb -->
@@ -136,53 +123,8 @@
   <!-- **************************************************** -->
   <!-- Updates devel repository with generated package -->
   <!-- **************************************************** -->
-  <target name="common-debpkg-updatedevelrepository" depends="common-debpkg-hostname" if="isarieljr">
+  <target name="common-debpkg-updatedevelrepository">
     <common-debpkg-updaterepository repo="debian" fullname="${package.fullname}" filename="${package.filename}" />
-  </target>
-
-
-
-  <!-- **************************************************** -->
-  <!-- Updates devel repository with generated devel package -->
-  <!-- **************************************************** -->
-  <target name="common-debpkg-updatedevelrepositorydev" depends="common-debpkg-hostname" if="isarieljr">
-    <common-debpkg-updaterepository repo="debian" fullname="${package.fullname_dev}" filename="${package.filename_dev}" />
-  </target>
-
-
-
-  <!-- **************************************************** -->
-  <!-- Updates devel repository with generated versioned package -->
-  <!-- **************************************************** -->
-  <target name="common-debpkg-updatedevelrepositoryversioned" depends="common-debpkg-hostname" if="isarieljr">
-    <common-debpkg-updaterepository repo="debian" fullname="${package.fullname_versioned}" filename="${package.filename_versioned}" />
-  </target>
-
-
-
-  <!-- **************************************************** -->
-  <!-- Updates devel repository with generated devel versioned package -->
-  <!-- **************************************************** -->
-  <target name="common-debpkg-updatedevelrepositoryversioneddev" depends="common-debpkg-hostname" if="isarieljr">
-    <common-debpkg-updaterepository repo="debian" fullname="${package.fullname_versioned_dev}" filename="${package.filename_versioned_dev}" />
-  </target>
-
-
-
-  <!-- **************************************************** -->
-  <!-- Updates Integra repository with generated package -->
-  <!-- **************************************************** -->
-  <target name="common-debpkg-updateintegrarepository" depends="common-debpkg-hostname" if="isarieljr">
-    <common-debpkg-updaterepository repo="integra" fullname="${package.fullname}" filename="${package.filename}" />
-  </target>
-
-
-
-  <!-- **************************************************** -->
-  <!-- Updates Integra repository with generated versioned package -->
-  <!-- **************************************************** -->
-  <target name="common-debpkg-updateintegrarepositoryversioned" depends="common-debpkg-hostname" if="isarieljr">
-    <common-debpkg-updaterepository repo="integra" fullname="${package.fullname_versioned}" filename="${package.filename_versioned}" />
   </target>
 
 </project>

@@ -2,16 +2,9 @@
   "name": "common-ant-buildlibs/debpkg",
   "require-dev":
   {
-    "common-ant-buildlibs/svn": "dev-master"
+    "common-ant-buildlibs/svn": "dev-master",
+    "common-ant-buildlibs/git": "dev-master"
   },
-  "repositories":
-  [
-    {
-      "type": "vcs",
-      "url": "http://installer:installer@192.168.10.7/svn/androme/common-ant-buildlibs/",
-      "package-path": "svn/"
-    }
-  ],
   "autoload":
   {
     "classmap": [ "InstallTask.php", "UpdateRepositoryTask.php" ]
