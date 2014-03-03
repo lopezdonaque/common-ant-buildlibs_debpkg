@@ -1,0 +1,188 @@
+
+<project>
+
+  <!-- ********************************************************* -->
+  <!-- Hostname: Reads the hostname to determine if it's arieljr -->
+  <!-- ********************************************************* -->
+  <target name="common-debpkg-hostname">
+    <hostinfo prefix="localhost"/>
+    <echo message="The current host is: ${localhost.NAME}" />
+    <condition property="isarieljr" value="true">
+      <equals arg1="${localhost.NAME}" arg2="arieljr" />
+    </condition>
+  </target>
+
+
+
+  <!-- ********************************************************* -->
+  <!-- Defines the names of the packages -->
+  <!-- ********************************************************* -->
+  <target name="common-debpkg-definenames" depends="common-svn-lastrevision">
+    <property name="package.version" value="${package.majorversion}.${svn-lastrevision}" />
+    <echo>Version: ${package.version}</echo>
+
+    <!-- <foo>_<VersionUpstream>-<DebianRevisionNumber>_<DebianArchitecture>.deb -->
+    <property name="package.fullname" value="${package.name}" />
+    <property name="package.fullname_dev" value="${package.fullname}-dev" />
+    <property name="package.filename" value="${package.fullname}_${package.version}-1_all.deb" />
+    <property name="package.filename_dev" value="${package.fullname_dev}_${package.version}-1_all.deb" />
+    <echo>Package fullname: ${package.fullname}</echo>
+
+    <!-- <foo_versioned>_<VersionUpstream>-<DebianRevisionNumber>_<DebianArchitecture>.deb -->
+    <property name="package.fullname_versioned" value="${package.name}-${package.majorversion}" />
+    <property name="package.fullname_versioned_dev" value="${package.fullname_versioned}-dev" />
+    <property name="package.filename_versioned" value="${package.fullname_versioned}_${package.version}-1_all.deb" />
+    <property name="package.filename_versioned_dev" value="${package.fullname_versioned_dev}_${package.version}-1_all.deb" />
+    <echo>Package fullname versioned: ${package.fullname_versioned}</echo>
+    <echo>Package fullname versioned dev: ${package.fullname_versioned_dev}</echo>
+  </target>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Installs Debian package by given filename -->
+  <!-- **************************************************** -->
+  <macrodef name="common-debpkg-install">
+    <attribute name="filename" />
+    <sequential>
+      <exec executable="sudo" failonerror="true">
+        <arg value="dpkg" />
+        <arg value="-i" />
+        <arg value="@{filename}" />
+      </exec>
+    </sequential>
+  </macrodef>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Installs generated package -->
+  <!-- **************************************************** -->
+  <target name="common-debpkg-install">
+    <common-debpkg-install filename="${package.filename}" />
+  </target>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Installs generated devel package -->
+  <!-- **************************************************** -->
+  <target name="common-debpkg-installdev">
+    <common-debpkg-install filename="${package.filename_dev}" />
+  </target>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Installs generated versioned package -->
+  <!-- **************************************************** -->
+  <target name="common-debpkg-installversioned">
+    <common-debpkg-install filename="${package.filename_versioned}" />
+  </target>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Installs generated devel versioned package -->
+  <!-- **************************************************** -->
+  <target name="common-debpkg-installversioneddev">
+    <common-debpkg-install filename="${package.filename_versioned_dev}" />
+  </target>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Updates Debian repository (Adds the current package to the Debian repository) -->
+  <!-- **************************************************** -->
+  <macrodef name="common-debpkg-updaterepository">
+
+    <attribute name="fullname" />
+    <attribute name="filename" />
+    <attribute name="repo" />
+
+    <sequential>
+
+      <!-- Remove previous package -->
+      <echo message="Removing deb package: @{fullname}" />
+      <exec executable="sudo" failonerror="true">
+        <arg value="/usr/bin/reprepro" />
+        <arg value="-b" />
+        <arg value="/var/www/repos/apt/@{repo}" />
+        <arg value="--waitforlock" />
+        <arg value="30" />
+        <arg value="remove" />
+        <arg value="squeeze" />
+        <arg value="@{fullname}" />
+      </exec>
+
+      <!-- Add new deb file -->
+      <echo message="Adding deb file: @{filename}" />
+      <exec executable="sudo" failonerror="true">
+        <arg value="/usr/bin/reprepro"/>
+        <arg value="-b" />
+        <arg value="/var/www/repos/apt/@{repo}" />
+        <arg value="--waitforlock" />
+        <arg value="30" />
+        <arg value="includedeb" />
+        <arg value="squeeze" />
+        <arg value="@{filename}" />
+      </exec>
+
+    </sequential>
+  </macrodef>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Updates devel repository with generated package -->
+  <!-- **************************************************** -->
+  <target name="common-debpkg-updatedevelrepository" depends="common-debpkg-hostname" if="isarieljr">
+    <common-debpkg-updaterepository repo="debian" fullname="${package.fullname}" filename="${package.filename}" />
+  </target>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Updates devel repository with generated devel package -->
+  <!-- **************************************************** -->
+  <target name="common-debpkg-updatedevelrepositorydev" depends="common-debpkg-hostname" if="isarieljr">
+    <common-debpkg-updaterepository repo="debian" fullname="${package.fullname_dev}" filename="${package.filename_dev}" />
+  </target>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Updates devel repository with generated versioned package -->
+  <!-- **************************************************** -->
+  <target name="common-debpkg-updatedevelrepositoryversioned" depends="common-debpkg-hostname" if="isarieljr">
+    <common-debpkg-updaterepository repo="debian" fullname="${package.fullname_versioned}" filename="${package.filename_versioned}" />
+  </target>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Updates devel repository with generated devel versioned package -->
+  <!-- **************************************************** -->
+  <target name="common-debpkg-updatedevelrepositoryversioneddev" depends="common-debpkg-hostname" if="isarieljr">
+    <common-debpkg-updaterepository repo="debian" fullname="${package.fullname_versioned_dev}" filename="${package.filename_versioned_dev}" />
+  </target>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Updates Integra repository with generated package -->
+  <!-- **************************************************** -->
+  <target name="common-debpkg-updateintegrarepository" depends="common-debpkg-hostname" if="isarieljr">
+    <common-debpkg-updaterepository repo="integra" fullname="${package.fullname}" filename="${package.filename}" />
+  </target>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Updates Integra repository with generated versioned package -->
+  <!-- **************************************************** -->
+  <target name="common-debpkg-updateintegrarepositoryversioned" depends="common-debpkg-hostname" if="isarieljr">
+    <common-debpkg-updaterepository repo="integra" fullname="${package.fullname_versioned}" filename="${package.filename_versioned}" />
+  </target>
+
+</project>
