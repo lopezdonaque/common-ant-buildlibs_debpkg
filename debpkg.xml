@@ -1,11 +1,145 @@
 
 <project>
 
+  <!-- **************************************************** -->
+  <!-- Installs Debian package by given filename -->
+  <!-- **************************************************** -->
+  <macrodef name="common-debpkg-install">
+    <attribute name="filename" />
+    <sequential>
+      <exec executable="sudo" failonerror="true">
+        <arg line="dpkg -i @{filename}" />
+      </exec>
+    </sequential>
+  </macrodef>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Removes package from repository -->
+  <!-- **************************************************** -->
+  <macrodef name="common-debpkg-remove_from_repository">
+
+    <attribute name="fullname" />
+    <attribute name="repopath" />
+    <attribute name="reponame" />
+    <attribute name="distribution" />
+    <attribute name="architecture" default="UNSET" />
+
+    <sequential>
+
+      <local name="_architecture_arg" />
+      <condition property="_architecture_arg" value="" else="--architecture @{architecture}">
+        <equals arg1="@{architecture}" arg2="UNSET" />
+      </condition>
+
+      <echo message="Removing deb package [@{architecture}] [@{fullname}]" />
+      <exec executable="sudo" failonerror="true">
+        <arg value="/usr/bin/reprepro" />
+        <arg value="--verbose" />
+        <arg line="--waitforlock 30" />
+        <arg line="--basedir @{repopath}/@{reponame}" />
+        <arg line="${_architecture_arg}" />
+        <arg value="remove" />
+        <arg value="@{distribution}" />
+        <arg value="@{fullname}" />
+      </exec>
+
+    </sequential>
+  </macrodef>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Adds package to repository -->
+  <!-- **************************************************** -->
+  <macrodef name="common-debpkg-add_to_repository">
+
+    <attribute name="filename" />
+    <attribute name="repopath" />
+    <attribute name="reponame" />
+    <attribute name="distribution" />
+    <attribute name="architecture" default="UNSET" />
+
+    <sequential>
+
+      <local name="_architecture_arg" />
+      <condition property="_architecture_arg" value="" else="--architecture @{architecture}">
+        <equals arg1="@{architecture}" arg2="UNSET" />
+      </condition>
+
+      <echo message="Adding deb file [@{architecture}] [@{filename}]" />
+      <exec executable="sudo" failonerror="true">
+        <arg value="/usr/bin/reprepro"/>
+        <arg value="--verbose" />
+        <arg line="--waitforlock 30" />
+        <arg line="--basedir @{repopath}/@{reponame}" />
+        <arg line="${_architecture_arg}" />
+        <arg value="includedeb" />
+        <arg value="@{distribution}" />
+        <arg value="@{filename}" />
+      </exec>
+
+    </sequential>
+  </macrodef>
+
+
+
+  <!-- **************************************************** -->
+  <!-- Updates package on repository (Removes and adds the package) -->
+  <!-- **************************************************** -->
+  <macrodef name="common-debpkg-updaterepository">
+
+    <attribute name="fullname" />
+    <attribute name="filename" />
+    <attribute name="repopath" />
+    <attribute name="reponame" />
+    <attribute name="distribution" />
+    <attribute name="architecture" default="UNSET" />
+
+    <sequential>
+
+      <local name="_architecture_arg" />
+      <condition property="_architecture_arg" value="" else="--architecture @{architecture}">
+        <equals arg1="@{architecture}" arg2="UNSET" />
+      </condition>
+
+      <!-- Remove previous package -->
+      <echo message="Removing deb package [@{architecture}] [@{fullname}]" />
+      <exec executable="sudo" failonerror="true">
+        <arg value="/usr/bin/reprepro" />
+        <arg value="--verbose" />
+        <arg line="--waitforlock 30" />
+        <arg line="--basedir @{repopath}/@{reponame}" />
+        <arg line="${_architecture_arg}" />
+        <arg value="remove" />
+        <arg value="@{distribution}" />
+        <arg value="@{fullname}" />
+      </exec>
+
+      <!-- Add new deb file -->
+      <echo message="Adding deb file [@{architecture}] [@{filename}]" />
+      <exec executable="sudo" failonerror="true">
+        <arg value="/usr/bin/reprepro"/>
+        <arg value="--verbose" />
+        <arg line="--waitforlock 30" />
+        <arg line="--basedir @{repopath}/@{reponame}" />
+        <arg line="${_architecture_arg}" />
+        <arg value="includedeb" />
+        <arg value="@{distribution}" />
+        <arg value="@{filename}" />
+      </exec>
+
+    </sequential>
+  </macrodef>
+
+
+
   <!-- ********************************************************* -->
   <!-- Defines the names of the packages -->
   <!-- ********************************************************* -->
-  <target name="common-debpkg-definenames" depends="common-svn-revision, common-git-revision">
-    <property name="package.version" value="${package.majorversion}.${repository.version}" />
+  <target name="common-debpkg-definenames" depends="common-svn-lastrevision">
+    <property name="package.version" value="${package.majorversion}.${svn-lastrevision}" />
     <echo>Version: ${package.version}</echo>
 
     <!-- <foo>_<VersionUpstream>-<DebianRevisionNumber>_<DebianArchitecture>.deb -->
@@ -22,109 +156,6 @@
     <property name="package.filename_versioned_dev" value="${package.fullname_versioned_dev}_${package.version}-1_all.deb" />
     <echo>Package fullname versioned: ${package.fullname_versioned}</echo>
     <echo>Package fullname versioned dev: ${package.fullname_versioned_dev}</echo>
-  </target>
-
-
-
-  <!-- **************************************************** -->
-  <!-- Installs Debian package by given filename -->
-  <!-- **************************************************** -->
-  <macrodef name="common-debpkg-install">
-    <attribute name="filename" />
-    <sequential>
-      <exec executable="sudo" failonerror="true">
-        <arg value="dpkg" />
-        <arg value="-i" />
-        <arg value="@{filename}" />
-      </exec>
-    </sequential>
-  </macrodef>
-
-
-
-  <!-- **************************************************** -->
-  <!-- Installs generated package -->
-  <!-- **************************************************** -->
-  <target name="common-debpkg-install">
-    <common-debpkg-install filename="${package.filename}" />
-  </target>
-
-
-
-  <!-- **************************************************** -->
-  <!-- Installs generated devel package -->
-  <!-- **************************************************** -->
-  <target name="common-debpkg-installdev">
-    <common-debpkg-install filename="${package.filename_dev}" />
-  </target>
-
-
-
-  <!-- **************************************************** -->
-  <!-- Installs generated versioned package -->
-  <!-- **************************************************** -->
-  <target name="common-debpkg-installversioned">
-    <common-debpkg-install filename="${package.filename_versioned}" />
-  </target>
-
-
-
-  <!-- **************************************************** -->
-  <!-- Installs generated devel versioned package -->
-  <!-- **************************************************** -->
-  <target name="common-debpkg-installversioneddev">
-    <common-debpkg-install filename="${package.filename_versioned_dev}" />
-  </target>
-
-
-
-  <!-- **************************************************** -->
-  <!-- Updates Debian repository (Adds the current package to the Debian repository) -->
-  <!-- **************************************************** -->
-  <macrodef name="common-debpkg-updaterepository">
-
-    <attribute name="fullname" />
-    <attribute name="filename" />
-    <attribute name="repo" />
-
-    <sequential>
-
-      <!-- Remove previous package -->
-      <echo message="Removing deb package: @{fullname}" />
-      <exec executable="sudo" failonerror="true">
-        <arg value="/usr/bin/reprepro" />
-        <arg value="-b" />
-        <arg value="/var/www/repos/apt/@{repo}" />
-        <arg value="--waitforlock" />
-        <arg value="30" />
-        <arg value="remove" />
-        <arg value="squeeze" />
-        <arg value="@{fullname}" />
-      </exec>
-
-      <!-- Add new deb file -->
-      <echo message="Adding deb file: @{filename}" />
-      <exec executable="sudo" failonerror="true">
-        <arg value="/usr/bin/reprepro"/>
-        <arg value="-b" />
-        <arg value="/var/www/repos/apt/@{repo}" />
-        <arg value="--waitforlock" />
-        <arg value="30" />
-        <arg value="includedeb" />
-        <arg value="squeeze" />
-        <arg value="@{filename}" />
-      </exec>
-
-    </sequential>
-  </macrodef>
-
-
-
-  <!-- **************************************************** -->
-  <!-- Updates devel repository with generated package -->
-  <!-- **************************************************** -->
-  <target name="common-debpkg-updatedevelrepository">
-    <common-debpkg-updaterepository repo="debian" fullname="${package.fullname}" filename="${package.filename}" />
   </target>
 
 </project>
