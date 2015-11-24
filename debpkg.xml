@@ -138,8 +138,33 @@
   <!-- ********************************************************* -->
   <!-- Defines the names of the packages -->
   <!-- ********************************************************* -->
-  <target name="common-debpkg-definenames" depends="common-svn-lastrevision">
-    <property name="package.version" value="${package.majorversion}.${svn-lastrevision}" />
+  <target name="common-debpkg-definenames" depends="common-svn-info">
+    <property name="package.version" value="${package.majorversion}.${svn.info.lastRev}" />
+    <echo>Version: ${package.version}</echo>
+
+    <!-- <foo>_<VersionUpstream>-<DebianRevisionNumber>_<DebianArchitecture>.deb -->
+    <property name="package.fullname" value="${package.name}" />
+    <property name="package.fullname_dev" value="${package.fullname}-dev" />
+    <property name="package.filename" value="${package.fullname}_${package.version}-1_all.deb" />
+    <property name="package.filename_dev" value="${package.fullname_dev}_${package.version}-1_all.deb" />
+    <echo>Package fullname: ${package.fullname}</echo>
+
+    <!-- <foo_versioned>_<VersionUpstream>-<DebianRevisionNumber>_<DebianArchitecture>.deb -->
+    <property name="package.fullname_versioned" value="${package.name}-${package.majorversion}" />
+    <property name="package.fullname_versioned_dev" value="${package.fullname_versioned}-dev" />
+    <property name="package.filename_versioned" value="${package.fullname_versioned}_${package.version}-1_all.deb" />
+    <property name="package.filename_versioned_dev" value="${package.fullname_versioned_dev}_${package.version}-1_all.deb" />
+    <echo>Package fullname versioned: ${package.fullname_versioned}</echo>
+    <echo>Package fullname versioned dev: ${package.fullname_versioned_dev}</echo>
+  </target>
+
+
+
+  <!-- ********************************************************* -->
+  <!-- Defines the names of the packages using revision instead of last revision -->
+  <!-- ********************************************************* -->
+  <target name="common-debpkg-definenames-rev" depends="common-svn-info">
+    <property name="package.version" value="${package.majorversion}.${svn.info.rev}" />
     <echo>Version: ${package.version}</echo>
 
     <!-- <foo>_<VersionUpstream>-<DebianRevisionNumber>_<DebianArchitecture>.deb -->
