@@ -147,6 +147,8 @@
     <property name="package.fullname_dev" value="${package.fullname}-dev" />
     <property name="package.filename" value="${package.fullname}_${package.version}-1_all.deb" />
     <property name="package.filename_dev" value="${package.fullname_dev}_${package.version}-1_all.deb" />
+    <property name="package.filename_amd64" value="${package.fullname}_${package.version}-1_amd64.deb" />
+    <property name="package.filename_dev_amd64" value="${package.fullname_dev}_${package.version}-1_amd64.deb" />
     <echo>Package fullname: ${package.fullname}</echo>
 
     <!-- <foo_versioned>_<VersionUpstream>-<DebianRevisionNumber>_<DebianArchitecture>.deb -->
@@ -154,6 +156,8 @@
     <property name="package.fullname_versioned_dev" value="${package.fullname_versioned}-dev" />
     <property name="package.filename_versioned" value="${package.fullname_versioned}_${package.version}-1_all.deb" />
     <property name="package.filename_versioned_dev" value="${package.fullname_versioned_dev}_${package.version}-1_all.deb" />
+    <property name="package.filename_versioned_amd64" value="${package.fullname_versioned}_${package.version}-1_amd64.deb" />
+    <property name="package.filename_versioned_dev_amd64" value="${package.fullname_versioned_dev}_${package.version}-1_amd64.deb" />
     <echo>Package fullname versioned: ${package.fullname_versioned}</echo>
     <echo>Package fullname versioned dev: ${package.fullname_versioned_dev}</echo>
   </target>
@@ -172,6 +176,8 @@
     <property name="package.fullname_dev" value="${package.fullname}-dev" />
     <property name="package.filename" value="${package.fullname}_${package.version}-1_all.deb" />
     <property name="package.filename_dev" value="${package.fullname_dev}_${package.version}-1_all.deb" />
+    <property name="package.filename_amd64" value="${package.fullname}_${package.version}-1_amd64.deb" />
+    <property name="package.filename_dev_amd64" value="${package.fullname_dev}_${package.version}-1_amd64.deb" />
     <echo>Package fullname: ${package.fullname}</echo>
 
     <!-- <foo_versioned>_<VersionUpstream>-<DebianRevisionNumber>_<DebianArchitecture>.deb -->
@@ -179,6 +185,8 @@
     <property name="package.fullname_versioned_dev" value="${package.fullname_versioned}-dev" />
     <property name="package.filename_versioned" value="${package.fullname_versioned}_${package.version}-1_all.deb" />
     <property name="package.filename_versioned_dev" value="${package.fullname_versioned_dev}_${package.version}-1_all.deb" />
+    <property name="package.filename_versioned_amd64" value="${package.fullname_versioned}_${package.version}-1_amd64.deb" />
+    <property name="package.filename_versioned_dev_amd64" value="${package.fullname_versioned_dev}_${package.version}-1_amd64.deb" />
     <echo>Package fullname versioned: ${package.fullname_versioned}</echo>
     <echo>Package fullname versioned dev: ${package.fullname_versioned_dev}</echo>
   </target>
